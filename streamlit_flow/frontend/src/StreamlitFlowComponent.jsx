@@ -25,6 +25,7 @@ import {MarkdownInputNode, MarkdownOutputNode, MarkdownDefaultNode} from "./comp
 import PaneConextMenu from "./components/PaneContextMenu";
 import NodeContextMenu from "./components/NodeContextMenu";
 import EdgeContextMenu from "./components/EdgeContextMenu";
+import ScreenshotButton from './components/ScreenshotButton';
 
 import createElkGraphLayout from "./layouts/ElkLayout";
 
@@ -43,6 +44,8 @@ const StreamlitFlowComponent = (props) => {
     const [paneContextMenu, setPaneContextMenu] = useState(null);
     const [nodeContextMenu, setNodeContextMenu] = useState(null);
     const [edgeContextMenu, setEdgeContextMenu] = useState(null);
+
+    const [imageDataUrl, setImageDataUrl] = useState(null)
 
     const nodesInitialized = useNodesInitialized({'includeHiddenNodes': false});
 
@@ -63,11 +66,11 @@ const StreamlitFlowComponent = (props) => {
             .catch(err => console.log(err));
     }
 
-    const handleDataReturnToStreamlit = (_nodes, _edges, selectedId) => {
+    const handleDataReturnToStreamlit = (_nodes, _edges, selectedId, img) => {
 
         const timestamp = (new Date()).getTime();
         setLastUpdateTimestamp(timestamp);
-        Streamlit.setComponentValue({'nodes': _nodes, 'edges': _edges, 'selectedId': selectedId, 'timestamp': timestamp});
+        Streamlit.setComponentValue({'nodes': _nodes, 'edges': _edges, 'selectedId': selectedId, 'timestamp': timestamp, 'imageDataUrl': img !== undefined ? img : imageDataUrl});
     }
 
     const calculateMenuPosition = (event) => {
@@ -209,6 +212,11 @@ const StreamlitFlowComponent = (props) => {
         handleDataReturnToStreamlit(updatedNodes, edges, null);
     }
 
+    const handleScreenshot = (imageDataUrl) => {
+        setImageDataUrl(imageDataUrl);
+        handleDataReturnToStreamlit(nodes, edges, null, imageDataUrl);
+    };
+
     return (
         <div style={{height: props.args.height}}>
             <ReactFlow
@@ -268,6 +276,7 @@ const StreamlitFlowComponent = (props) => {
                                             theme={props.theme}/>}
                     {props.args["showControls"] && <Controls/>}
                     {props.args["showMiniMap"] && <MiniMap pannable zoomable/>}
+                    {props.args["showScreenshot"] && <ScreenshotButton config={props.args["screenshotConfig"]} onScreenshot={handleScreenshot}/>}
                 </ReactFlow>
         </div>
     );

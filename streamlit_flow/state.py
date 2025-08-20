@@ -13,17 +13,20 @@ class StreamlitFlowState:
     - **edges** : List[StreamlitFlowEdge] : The list of edges in the flowchart.
     - **selected_id** : str? : The id of the selected node.
     - **timestamp** : float? : The timestamp of the state.
+    - **screenshot** : str? : The screenshot of the flowchart.
     """
 
     nodes: List[StreamlitFlowNode]
     edges: List[StreamlitFlowEdge]
     selected_id: str = None
     timestamp: int = field(default_factory=lambda: int(datetime.now().timestamp() * 1000))
+    screenshot: str = None
 
     def asdict(self):
         return {
             'nodes': [node.asdict() for node in self.nodes],
             'edges': [edge.asdict() for edge in self.edges],
             'selected_id': self.selected_id,
-            'timestamp': self.timestamp
+            'timestamp': self.timestamp,
+            'screenshot': self.screenshot
         }

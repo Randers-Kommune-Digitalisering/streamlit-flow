@@ -39,7 +39,9 @@ def streamlit_flow(key:str,
                     enable_pane_menu:bool=False,
                     enable_node_menu:bool=False,
                     enable_edge_menu:bool=False,
-                    hide_watermark:bool=False):
+                    hide_watermark:bool=False,
+                    show_screenshot:bool=False,
+                    screenshot_config:dict={}):
     
     """
     The main function to render the flowchart component in Streamlit.
@@ -64,7 +66,13 @@ def streamlit_flow(key:str,
     - **enable_node_menu** : bool : Whether to enable the node menu.
     - **enable_edge_menu** : bool : Whether to enable the edge menu.
     - **hide_watermark** : bool : Whether to hide the watermark.
+    - **show_screenshot** : bool : Whether to show the screenshot button.
+    - **screenshot_config** : dict : Configuration for screenshot functionality.
     """
+
+    if "format" in screenshot_config:
+        if screenshot_config["format"] not in {"svg", "png", "jpeg"}:
+            raise ValueError("screenshot_config['format'] must be one of: 'svg', 'png', 'jpeg'.")
 
     nodes = [node.asdict() for node in state.nodes]
     edges = [edge.asdict() for edge  in state.edges]
@@ -90,6 +98,8 @@ def streamlit_flow(key:str,
                                         hideWatermark=hide_watermark,
                                         key=key,
                                         timestamp=state.timestamp,
+                                        showScreenshot=show_screenshot,
+                                        screenshotConfig=screenshot_config,
                                         component='streamlit_flow')
     
     
@@ -100,7 +110,8 @@ def streamlit_flow(key:str,
         nodes=[StreamlitFlowNode.from_dict(node) for node in component_value['nodes']],
         edges=[StreamlitFlowEdge.from_dict(edge) for edge in component_value['edges']],
         selected_id=component_value['selectedId'],
-        timestamp=component_value['timestamp']
+        timestamp=component_value['timestamp'],
+        screenshot=component_value['imageDataUrl']
     )
 
     return new_state
