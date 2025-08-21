@@ -23,16 +23,27 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Cache Node modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Build frontend
+        working-directory: streamlit_flow/frontend
+        env:
+          CI: false
         run: |
-          cd streamlit_flow/frontend
           npm install
-          CI=false npm run build
+          npm run build
 
       - name: Build Python package
         run: |
           pip install build
           python -m build
+
       - name: Publish release
         uses: softprops/action-gh-release@v1
         with:
