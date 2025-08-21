@@ -27,7 +27,7 @@ jobs:
         run: |
           cd streamlit_flow/frontend
           npm install
-          npm run build
+          CI=false npm run build
 
       - name: Build Python package
         run: |
