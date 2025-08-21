@@ -6,7 +6,7 @@ from .elements import StreamlitFlowNode, StreamlitFlowEdge
 from .layouts import Layout, ManualLayout
 from .state import StreamlitFlowState
 
-_RELEASE = False
+_RELEASE = True
 
 if not _RELEASE:
     _st_flow_func = components.declare_component(
