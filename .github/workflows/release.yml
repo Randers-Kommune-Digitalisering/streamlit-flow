@@ -16,12 +16,12 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '20'
 
       - name: Build frontend
         working-directory: streamlit_flow/frontend
@@ -44,10 +44,4 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            dist/*
-            streamlit_flow/frontend/build/**/*
-
-      - name: Post-build cleanup
-        run: |
-          rm -rf build dist streamlit_flow_component.egg-info streamlit_flow/frontend/build
-          sed -i 's/_RELEASE = True/_RELEASE = False/g' streamlit_flow/__init__.py
+            dist/
