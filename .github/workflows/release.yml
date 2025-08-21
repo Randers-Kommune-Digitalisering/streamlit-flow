@@ -1,0 +1,39 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Build frontend
+        run: |
+          cd streamlit_flow/frontend
+          npm install
+          npm run build
+
+      - name: Build Python package
+        run: |
+          pip install build
+          python -m build
+      - name: Publish release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/*
