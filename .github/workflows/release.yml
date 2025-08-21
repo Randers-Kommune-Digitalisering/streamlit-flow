@@ -23,14 +23,6 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Cache Node modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
       - name: Build frontend
         working-directory: streamlit_flow/frontend
         env:
@@ -39,12 +31,23 @@ jobs:
           npm install
           npm run build
 
+      - name: Set _RELEASE = True
+        run: |
+          sed -i 's/_RELEASE = False/_RELEASE = True/g' streamlit_flow/__init__.py
+
       - name: Build Python package
         run: |
           pip install build
           python -m build
 
-      - name: Publish release
+      - name: Publish release to GitHub
         uses: softprops/action-gh-release@v1
         with:
-          files: dist/*
+          files: |
+            dist/*
+            streamlit_flow/frontend/build/**/*
+
+      - name: Post-build cleanup
+        run: |
+          rm -rf build dist streamlit_flow_component.egg-info streamlit_flow/frontend/build
+          sed -i 's/_RELEASE = True/_RELEASE = False/g' streamlit_flow/__init__.py
