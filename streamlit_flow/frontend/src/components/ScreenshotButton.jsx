@@ -42,7 +42,7 @@ function ScreenshotButton({config, onScreenshot }) {
     }
     const viewportElement = document.querySelector('.react-flow__viewport');
     const format = config?.format ?? 'png';
-    const returnImage = config?.return ?? true;
+    const returnImage = config?.addToState ?? false;
 
     const handleImage = (dataUrl) => {
       if (returnImage) {
@@ -67,7 +67,9 @@ function ScreenshotButton({config, onScreenshot }) {
 
   return (
     <Panel position="top-right">
-      <button className="screenshot-btn" onClick={onClick} title="screenshot"/>
+      <button onClick={onClick} title="screenshot" style={{ backgroundColor: 'transparent', border: 'none', cursor: 'pointer', fontSize: '20px' }}>
+        <i className="bi bi-camera"></i>
+      </button>
     </Panel>
   );
 }
