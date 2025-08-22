@@ -54,6 +54,18 @@ const StreamlitFlowComponent = (props) => {
     const {fitView, getNodes, getEdges} = useReactFlow();
 
     // Helper Functions
+    const handleDataReturnToStreamlit = React.useCallback((_nodes, _edges, selectedId, imgData) => {
+        const timestamp = (new Date()).getTime();
+        setLastUpdateTimestamp(timestamp);
+        Streamlit.setComponentValue({
+            nodes: _nodes,
+            edges: _edges,
+            selectedId,
+            timestamp,
+            imageDataUrl: typeof imgData !== 'undefined' ? imgData : imageDataUrl
+        });
+    }, [setLastUpdateTimestamp, imageDataUrl]);
+
     const handleLayout = () => {
         createElkGraphLayout(getNodes(), getEdges(), props.args.layoutOptions)
             .then(({nodes, edges}) => {
@@ -64,13 +76,6 @@ const StreamlitFlowComponent = (props) => {
                 setLayoutCalculated(true);
             })
             .catch(err => console.log(err));
-    }
-
-    const handleDataReturnToStreamlit = (_nodes, _edges, selectedId, img) => {
-
-        const timestamp = (new Date()).getTime();
-        setLastUpdateTimestamp(timestamp);
-        Streamlit.setComponentValue({'nodes': _nodes, 'edges': _edges, 'selectedId': selectedId, 'timestamp': timestamp, 'imageDataUrl': img !== undefined ? img : imageDataUrl});
     }
 
     const calculateMenuPosition = (event) => {
