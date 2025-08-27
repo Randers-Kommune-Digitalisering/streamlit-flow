@@ -8,7 +8,7 @@
 
 ![Markdown Support in Node](assets/MarkdownNode.png)
 
-### Version 1.6.1-s
+### Version 1.7.0
 Adds the option to take screenshots of the flow / export the flow to an image file.
 The streamlit_flow function has two new arguments: show_screenshot and screenshot_config
 
