@@ -39,13 +39,13 @@ const StreamlitFlowComponent = (props) => {
     const [lastUpdateTimestamp, setLastUpdateTimestamp] = useState(props.args.timestamp);
     const [layoutNeedsUpdate, setLayoutNeedsUpdate] = useState(false);
 
+    const [imageDataUrl, setImageDataUrl] = useState(null)
+
     const [layoutCalculated, setLayoutCalculated] = useState(false);
 
     const [paneContextMenu, setPaneContextMenu] = useState(null);
     const [nodeContextMenu, setNodeContextMenu] = useState(null);
     const [edgeContextMenu, setEdgeContextMenu] = useState(null);
-
-    const [imageDataUrl, setImageDataUrl] = useState(null)
 
     const nodesInitialized = useNodesInitialized({'includeHiddenNodes': false});
 
@@ -66,7 +66,7 @@ const StreamlitFlowComponent = (props) => {
         });
     }, [setLastUpdateTimestamp, imageDataUrl]);
 
-    const handleLayout = () => {
+    const handleLayout = React.useCallback(() => {
         createElkGraphLayout(getNodes(), getEdges(), props.args.layoutOptions)
             .then(({nodes, edges}) => {
                 setNodes(nodes);
@@ -76,7 +76,7 @@ const StreamlitFlowComponent = (props) => {
                 setLayoutCalculated(true);
             })
             .catch(err => console.log(err));
-    }
+    }, [getNodes, getEdges, props.args.layoutOptions, setNodes, setEdges, setViewFitAfterLayout, handleDataReturnToStreamlit, setLayoutCalculated]);
 
     const calculateMenuPosition = (event) => {
         const pane = ref.current.getBoundingClientRect();
@@ -94,13 +94,13 @@ const StreamlitFlowComponent = (props) => {
         setEdgeContextMenu(null);
     }
 
-    useEffect(() => Streamlit.setFrameHeight());
+    useEffect(() => Streamlit.setFrameHeight(), []);
 
     // Layout calculation
     useEffect(() => {
         if(nodesInitialized && !layoutCalculated)
             handleLayout();
-    }, [nodesInitialized, layoutCalculated]);
+    }, [nodesInitialized, layoutCalculated, handleLayout]);
 
 
 
@@ -115,7 +115,7 @@ const StreamlitFlowComponent = (props) => {
             handleDataReturnToStreamlit(props.args.nodes, props.args.edges, null);
         }
 
-    }, [props.args.nodes, props.args.edges]);
+    }, [props.args.nodes, props.args.edges, lastUpdateTimestamp, props.args.timestamp, setNodes, setEdges, handleDataReturnToStreamlit]);
 
     // Handle layout when streamlit sends new state
     useEffect(() => {
@@ -124,7 +124,7 @@ const StreamlitFlowComponent = (props) => {
             setLayoutNeedsUpdate(false);
             setLayoutCalculated(false);
         }
-    }, [nodes, edges])
+    }, [nodes, edges, layoutNeedsUpdate]);
 
     // Auto zoom callback
     useEffect(() => {
@@ -133,12 +133,12 @@ const StreamlitFlowComponent = (props) => {
             fitView();
             setViewFitAfterLayout(true);
         }
-    }, [viewFitAfterLayout, props.args.fitView]);
+    }, [viewFitAfterLayout, props.args.fitView, fitView]);
 
     // Theme callback
     useEffect(() => {
         setEdges(edges.map(edge => ({...edge, labelStyle:{'fill': props.theme.base === "dark" ? 'white' : 'black'}})))
-    }, [props.theme.base])
+    }, [props.theme.base, edges, setEdges])
 
     // Context Menu Callbacks
 

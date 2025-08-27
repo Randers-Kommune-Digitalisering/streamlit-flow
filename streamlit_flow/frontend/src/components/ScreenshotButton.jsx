@@ -62,6 +62,8 @@ function ScreenshotButton({config, onScreenshot }) {
       case 'svg':
         toSvg(viewportElement, captureConfig).then(handleImage);
         break;
+      default:
+        toPng(viewportElement, captureConfig).then(handleImage);
     }
   };
 
