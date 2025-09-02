@@ -25,7 +25,6 @@ import {MarkdownInputNode, MarkdownOutputNode, MarkdownDefaultNode} from "./comp
 import PaneConextMenu from "./components/PaneContextMenu";
 import NodeContextMenu from "./components/NodeContextMenu";
 import EdgeContextMenu from "./components/EdgeContextMenu";
-import ScreenshotButton from './components/ScreenshotButton';
 
 import createElkGraphLayout from "./layouts/ElkLayout";
 
@@ -38,8 +37,6 @@ const StreamlitFlowComponent = (props) => {
     const [edges, setEdges, onEdgesChange] = useEdgesState(props.args.edges);
     const [lastUpdateTimestamp, setLastUpdateTimestamp] = useState(props.args.timestamp);
     const [layoutNeedsUpdate, setLayoutNeedsUpdate] = useState(false);
-
-    const [imageDataUrl, setImageDataUrl] = useState(null)
 
     const [layoutCalculated, setLayoutCalculated] = useState(false);
 
@@ -54,19 +51,7 @@ const StreamlitFlowComponent = (props) => {
     const {fitView, getNodes, getEdges} = useReactFlow();
 
     // Helper Functions
-    const handleDataReturnToStreamlit = React.useCallback((_nodes, _edges, selectedId, imgData) => {
-        const timestamp = (new Date()).getTime();
-        setLastUpdateTimestamp(timestamp);
-        Streamlit.setComponentValue({
-            nodes: _nodes,
-            edges: _edges,
-            selectedId,
-            timestamp,
-            imageDataUrl: typeof imgData !== 'undefined' ? imgData : imageDataUrl
-        });
-    }, [setLastUpdateTimestamp, imageDataUrl]);
-
-    const handleLayout = React.useCallback(() => {
+    const handleLayout = () => {
         createElkGraphLayout(getNodes(), getEdges(), props.args.layoutOptions)
             .then(({nodes, edges}) => {
                 setNodes(nodes);
@@ -76,7 +61,14 @@ const StreamlitFlowComponent = (props) => {
                 setLayoutCalculated(true);
             })
             .catch(err => console.log(err));
-    }, [getNodes, getEdges, props.args.layoutOptions, setNodes, setEdges, setViewFitAfterLayout, handleDataReturnToStreamlit, setLayoutCalculated]);
+    }
+
+    const handleDataReturnToStreamlit = (_nodes, _edges, selectedId) => {
+
+        const timestamp = (new Date()).getTime();
+        setLastUpdateTimestamp(timestamp);
+        Streamlit.setComponentValue({'nodes': _nodes, 'edges': _edges, 'selectedId': selectedId, 'timestamp': timestamp, 'imageDataUrl': null});
+    }
 
     const calculateMenuPosition = (event) => {
         const pane = ref.current.getBoundingClientRect();
@@ -94,13 +86,13 @@ const StreamlitFlowComponent = (props) => {
         setEdgeContextMenu(null);
     }
 
-    useEffect(() => Streamlit.setFrameHeight(), []);
+    useEffect(() => Streamlit.setFrameHeight());
 
     // Layout calculation
     useEffect(() => {
         if(nodesInitialized && !layoutCalculated)
             handleLayout();
-    }, [nodesInitialized, layoutCalculated, handleLayout]);
+    }, [nodesInitialized, layoutCalculated]);
 
 
 
@@ -115,7 +107,7 @@ const StreamlitFlowComponent = (props) => {
             handleDataReturnToStreamlit(props.args.nodes, props.args.edges, null);
         }
 
-    }, [props.args.nodes, props.args.edges, lastUpdateTimestamp, props.args.timestamp, setNodes, setEdges, handleDataReturnToStreamlit]);
+    }, [props.args.nodes, props.args.edges]);
 
     // Handle layout when streamlit sends new state
     useEffect(() => {
@@ -124,7 +116,7 @@ const StreamlitFlowComponent = (props) => {
             setLayoutNeedsUpdate(false);
             setLayoutCalculated(false);
         }
-    }, [nodes, edges, layoutNeedsUpdate]);
+    }, [nodes, edges])
 
     // Auto zoom callback
     useEffect(() => {
@@ -133,12 +125,12 @@ const StreamlitFlowComponent = (props) => {
             fitView();
             setViewFitAfterLayout(true);
         }
-    }, [viewFitAfterLayout, props.args.fitView, fitView]);
+    }, [viewFitAfterLayout, props.args.fitView]);
 
     // Theme callback
     useEffect(() => {
         setEdges(edges.map(edge => ({...edge, labelStyle:{'fill': props.theme.base === "dark" ? 'white' : 'black'}})))
-    }, [props.theme.base, edges, setEdges])
+    }, [props.theme.base])
 
     // Context Menu Callbacks
 
@@ -217,11 +209,6 @@ const StreamlitFlowComponent = (props) => {
         handleDataReturnToStreamlit(updatedNodes, edges, null);
     }
 
-    const handleScreenshot = (imageDataUrl) => {
-        setImageDataUrl(imageDataUrl);
-        handleDataReturnToStreamlit(nodes, edges, null, imageDataUrl);
-    };
-
     return (
         <div style={{height: props.args.height}}>
             <ReactFlow
@@ -281,7 +268,6 @@ const StreamlitFlowComponent = (props) => {
                                             theme={props.theme}/>}
                     {props.args["showControls"] && <Controls/>}
                     {props.args["showMiniMap"] && <MiniMap pannable zoomable/>}
-                    {props.args["showScreenshot"] && <ScreenshotButton config={props.args["screenshotConfig"]} onScreenshot={handleScreenshot}/>}
                 </ReactFlow>
         </div>
     );
