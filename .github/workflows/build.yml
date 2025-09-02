@@ -24,6 +24,8 @@ jobs:
 
       - name: Build frontend
         working-directory: streamlit_flow/frontend
+        env:
+           CI: false
         run: |
           npm install
           npm run build
