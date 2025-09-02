@@ -28,6 +28,8 @@ import EdgeContextMenu from "./components/EdgeContextMenu";
 
 import createElkGraphLayout from "./layouts/ElkLayout";
 
+import ScreenshotButton from './components/ScreenshotButton';
+
 const StreamlitFlowComponent = (props) => {
 
     const nodeTypes = useMemo(() => ({ input: MarkdownInputNode, output: MarkdownOutputNode, default: MarkdownDefaultNode}), []);
@@ -57,17 +59,15 @@ const StreamlitFlowComponent = (props) => {
                 setNodes(nodes);
                 setEdges(edges);
                 setViewFitAfterLayout(false);
-                handleDataReturnToStreamlit(nodes, edges, null);
+                handleDataReturnToStreamlit(nodes, edges, null, null);
                 setLayoutCalculated(true);
-            })
-            .catch(err => console.log(err));
+            }).catch(err => console.log(err));
     }
 
-    const handleDataReturnToStreamlit = (_nodes, _edges, selectedId) => {
-
+    const handleDataReturnToStreamlit = (_nodes, _edges, selectedId, imageDataUrl) => {
         const timestamp = (new Date()).getTime();
         setLastUpdateTimestamp(timestamp);
-        Streamlit.setComponentValue({'nodes': _nodes, 'edges': _edges, 'selectedId': selectedId, 'timestamp': timestamp, 'imageDataUrl': null});
+        Streamlit.setComponentValue({'nodes': _nodes, 'edges': _edges, 'selectedId': selectedId, 'timestamp': timestamp, 'imageDataUrl': imageDataUrl});
     }
 
     const calculateMenuPosition = (event) => {
@@ -104,7 +104,7 @@ const StreamlitFlowComponent = (props) => {
             setNodes(props.args.nodes);
             setEdges(props.args.edges);
             setLastUpdateTimestamp((new Date()).getTime());
-            handleDataReturnToStreamlit(props.args.nodes, props.args.edges, null);
+            handleDataReturnToStreamlit(props.args.nodes, props.args.edges, null, null);
         }
 
     }, [props.args.nodes, props.args.edges]);
@@ -177,7 +177,7 @@ const StreamlitFlowComponent = (props) => {
 
     const handlePaneClick = (event) => {
         clearMenus();
-        handleDataReturnToStreamlit(nodes, edges, null);
+        handleDataReturnToStreamlit(nodes, edges, null, null);
     }
 
     const handleNodeClick = (event, node) => {
@@ -189,7 +189,7 @@ const StreamlitFlowComponent = (props) => {
     const handleEdgeClick = (event, edge) => {
         clearMenus();
         if (props.args.getEdgeOnClick)
-            handleDataReturnToStreamlit(nodes, edges, edge.id);
+            handleDataReturnToStreamlit(nodes, edges, edge.id, null);
     }
 
 
@@ -197,7 +197,7 @@ const StreamlitFlowComponent = (props) => {
         const newEdgeId = `st-flow-edge_${params.source}-${params.target}`; 
         const newEdges = addEdge({...params, animated:props.args["animateNewEdges"], labelShowBg:false, id: newEdgeId}, edges);
         setEdges(newEdges);
-        handleDataReturnToStreamlit(nodes, newEdges, newEdgeId);
+        handleDataReturnToStreamlit(nodes, newEdges, newEdgeId, null);
     }
 
     const handleNodeDragStop = (event, node) => {
@@ -206,8 +206,12 @@ const StreamlitFlowComponent = (props) => {
                 return node;
             return n;
         });
-        handleDataReturnToStreamlit(updatedNodes, edges, null);
+        handleDataReturnToStreamlit(updatedNodes, edges, null, null);
     }
+
+    const handleScreenshot = (imageDataUrl) => {
+        handleDataReturnToStreamlit(nodes, edges, null, imageDataUrl);
+    };
 
     return (
         <div style={{height: props.args.height}}>
@@ -268,6 +272,7 @@ const StreamlitFlowComponent = (props) => {
                                             theme={props.theme}/>}
                     {props.args["showControls"] && <Controls/>}
                     {props.args["showMiniMap"] && <MiniMap pannable zoomable/>}
+                    {props.args["showScreenshot"] && <ScreenshotButton config={props.args["screenshotConfig"]} onScreenshot={handleScreenshot}/>}
                 </ReactFlow>
         </div>
     );
