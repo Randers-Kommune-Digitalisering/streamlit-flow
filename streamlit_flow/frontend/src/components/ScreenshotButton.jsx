@@ -1,9 +1,9 @@
 import { Panel, useReactFlow, getNodesBounds, getViewportForBounds } from 'reactflow';
 import { toPng, toJpeg, toSvg } from 'html-to-image';
 
-function downloadImage(dataUrl, extension) {
+function downloadImage(dataUrl, name, extension) {
   const a = document.createElement('a');
-  a.setAttribute('download', `reactflow.${extension}`);
+  a.setAttribute('download', `${extension}.${extension}`);
   a.setAttribute('href', dataUrl);
   a.click();
 }
@@ -43,12 +43,13 @@ function ScreenshotButton({config, onScreenshot }) {
     const viewportElement = document.querySelector('.react-flow__viewport');
     const format = config?.format ?? 'png';
     const returnImage = config?.addToState ?? false;
+    const name = config?.name ?? 'flow';
 
     const handleImage = (dataUrl) => {
       if (returnImage) {
         onScreenshot(dataUrl);
       } else {
-        downloadImage(dataUrl, format);
+        downloadImage(dataUrl, name, format);
       }
     };
 
