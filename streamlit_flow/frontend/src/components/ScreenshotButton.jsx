@@ -3,7 +3,7 @@ import { toPng, toJpeg, toSvg } from 'html-to-image';
 
 function downloadImage(dataUrl, name, extension) {
   const a = document.createElement('a');
-  a.setAttribute('download', `${extension}.${extension}`);
+  a.setAttribute('download', `${name}.${extension}`);
   a.setAttribute('href', dataUrl);
   a.click();
 }
